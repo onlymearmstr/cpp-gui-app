@@ -1,0 +1,86 @@
+stages:
+  - build
+  - package
+
+variables:
+  QT_VERSION: "6.6.1"
+  BUILD_TYPE: "Release"
+
+build_windows:
+  stage: build
+  tags:
+    - windows
+  script:
+    - echo "Installing Qt..."
+    - powershell -Command "Invoke-WebRequest -Uri 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_661/qt.qt6.661.win64_msvc2022_64/6.6.1-0-202311151048qtbase-Windows-Windows_10-MSVC2022-Windows-Windows_10-X86_64.7z' -OutFile 'qt.7z'"
+    - powershell -Command "Expand-Archive -Path 'qt.7z' -DestinationPath 'C:\Qt' -Force"
+    - set Qt6_DIR=C:\Qt\6.6.1\msvc2022_64\lib\cmake\Qt6
+    
+    - echo "Installing CMake..."
+    - choco install cmake -y
+    
+    - echo "Configuring project..."
+    - cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\Qt\6.6.1\msvc2022_64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
+    
+    - echo "Building project..."
+    - cmake --build build --config %BUILD_TYPE% --parallel
+    
+  artifacts:
+    paths:
+      - build/Release/CppGuiApp.exe
+    expire_in: 1 week
+  only:
+    - main
+    - master
+    - tags
+
+package_windows:
+  stage: package
+  tags:
+    - windows
+  dependencies:
+    - build_windows
+  script:
+    - echo "Packaging application..."
+    - mkdir release
+    - copy build\Release\CppGuiApp.exe release\
+    
+    - echo "Copying Qt dependencies..."
+    - set PATH=C:\Qt\6.6.1\msvc2022_64\bin;%PATH%
+    - windeployqt --release --no-translations release\CppGuiApp.exe
+    
+    - echo "Creating archive..."
+    - powershell -Command "Compress-Archive -Path 'release\*' -DestinationPath 'CppGuiApp-Windows.zip'"
+    
+  artifacts:
+    paths:
+      - CppGuiApp-Windows.zip
+    expire_in: 1 month
+  only:
+    - main
+    - master
+    - tags
+  when: on_success
+
+build_linux:
+  stage: build
+  image: gcc:11
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq cmake qt6-base-dev qt6-tools-dev build-essential
+  script:
+    - echo "Configuring project..."
+    - cmake -B build -DCMAKE_BUILD_TYPE=Release
+    
+    - echo "Building project..."
+    - cmake --build build --config Release --parallel
+    
+  artifacts:
+    paths:
+      - build/CppGuiApp
+    expire_in: 1 week
+  only:
+    - main
+    - master
+    - tags
+  allow_failure: true

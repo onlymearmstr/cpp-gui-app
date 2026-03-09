@@ -17,13 +17,9 @@ jobs:
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v1.3
     
-    - name: Setup Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '6.6.1'
-        target: 'desktop'
-        arch: 'win64_msvc2022_64'
-        cache: false
+    - name: Install Qt using Chocolatey
+      run: |
+        choco install qt6 --version=6.6.1 --no-progress
     
     - name: Setup CMake
       uses: jwlawson/actions-setup-cmake@v2.0

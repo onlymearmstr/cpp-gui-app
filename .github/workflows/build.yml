@@ -17,13 +17,17 @@ jobs:
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v1.3
     
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
     - name: Setup Qt
       uses: jurplel/install-qt-action@v3.3.0
       with:
-        version: '6.6.0'
+        version: '6.5.3'
         target: 'desktop'
-        arch: 'win64_msvc2022_64'
-        setup-python: false
+        arch: 'win64_msvc2019_64'
         cache: false
     
     - name: Setup CMake
@@ -33,7 +37,7 @@ jobs:
     
     - name: Configure CMake
       run: |
-        $env:Qt6_DIR = "C:\Qt\6.6.0\msvc2022_64\lib\cmake\Qt6"
+        $env:Qt6_DIR = "C:\Qt\6.5.3\msvc2019_64\lib\cmake\Qt6"
         cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:Qt6_DIR" -DCMAKE_BUILD_TYPE=Release
     
     - name: Build

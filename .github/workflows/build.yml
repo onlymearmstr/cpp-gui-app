@@ -44,8 +44,15 @@ jobs:
       run: |
         cmake --build build --config Release --parallel
     
+    - name: Deploy Qt dependencies
+      run: |
+        $qtBinPath = "C:\Qt\6.5.3\msvc2019_64\bin"
+        $windeployqt = "$qtBinPath\windeployqt.exe"
+        $exePath = "$env:GITHUB_WORKSPACE\build\Release\CppGuiApp.exe"
+        & $windeployqt --release $exePath
+    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: CppGuiApp-Windows
-        path: build/Release/CppGuiApp.exe
+        path: build/Release/

@@ -11,19 +11,23 @@ build_windows:
   tags:
     - shell
   script:
-    - echo "Installing Qt..."
-    - powershell -Command "Invoke-WebRequest -Uri 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_661/qt.qt6.661.win64_msvc2022_64/6.6.1-0-202311151048qtbase-Windows-Windows_10-MSVC2022-Windows-Windows_10-X86_64.7z' -OutFile 'qt.7z'"
-    - powershell -Command "Expand-Archive -Path 'qt.7z' -DestinationPath 'C:\Qt' -Force"
-    - set Qt6_DIR=C:\Qt\6.6.1\msvc2022_64\lib\cmake\Qt6
+    - echo "Checking for Qt..."
+    - if (Test-Path "C:\Qt\$env:QT_VERSION\msvc2022_64\bin") { echo "Qt found at C:\Qt\$env:QT_VERSION\msvc2022_64" } else { echo "Qt not found, downloading..." }
     
-    - echo "Installing CMake..."
-    - choco install cmake -y
+    - if (-not (Test-Path "C:\Qt\$env:QT_VERSION\msvc2022_64\bin")) { powershell -Command "Invoke-WebRequest -Uri 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_661/qt.qt6.661.win64_msvc2022_64/6.6.1-0-202311151048qtbase-Windows-Windows_10-MSVC2022-Windows-Windows_10-X86_64.7z' -OutFile 'qt.7z'" }
+    - if (-not (Test-Path "C:\Qt\$env:QT_VERSION\msvc2022_64\bin")) { powershell -Command "Expand-Archive -Path 'qt.7z' -DestinationPath 'C:\Qt' -Force" }
+    
+    - echo "Checking for CMake..."
+    - if (Test-Path "C:\Program Files\CMake\bin\cmake.exe") { echo "CMake found" } else { echo "CMake not found, installing..." }
+    - if (-not (Test-Path "C:\Program Files\CMake\bin\cmake.exe")) { powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))" }
+    - if (-not (Test-Path "C:\Program Files\CMake\bin\cmake.exe")) { choco install cmake -y }
     
     - echo "Configuring project..."
-    - cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\Qt\6.6.1\msvc2022_64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
+    - $env:QT_DIR = "C:\Qt\$env:QT_VERSION\msvc2022_64"
+    - cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QT_DIR" -DCMAKE_BUILD_TYPE="$env:BUILD_TYPE"
     
     - echo "Building project..."
-    - cmake --build build --config %BUILD_TYPE% --parallel
+    - cmake --build build --config $env:BUILD_TYPE --parallel
     
   artifacts:
     paths:
@@ -46,7 +50,8 @@ package_windows:
     - copy build\Release\CppGuiApp.exe release\
     
     - echo "Copying Qt dependencies..."
-    - set PATH=C:\Qt\6.6.1\msvc2022_64\bin;%PATH%
+    - $env:QT_DIR = "C:\Qt\$env:QT_VERSION\msvc2022_64"
+    - $env:PATH = "$env:QT_DIR\bin;$env:PATH"
     - windeployqt --release --no-translations release\CppGuiApp.exe
     
     - echo "Creating archive..."

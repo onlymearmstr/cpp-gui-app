@@ -14,8 +14,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Setup MSVC
+      uses: microsoft/setup-msbuild@v1.3
+    
     - name: Setup Qt
-      uses: jurplel/install-qt-action@v4
+      uses: aminya/setup-qt@v1
       with:
         version: '6.6.1'
         host: 'windows'
@@ -30,8 +33,7 @@ jobs:
     
     - name: Configure CMake
       run: |
-        $env:Qt6_DIR = "$env:GITHUB_WORKSPACE\Qt\6.6.1\msvc2022_64\lib\cmake\Qt6"
-        cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:Qt6_DIR" -DCMAKE_BUILD_TYPE=Release
+        cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
     
     - name: Build
       run: |

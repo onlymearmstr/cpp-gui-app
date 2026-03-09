@@ -9,7 +9,7 @@ variables:
 build_windows:
   stage: build
   tags:
-    - windows
+    - shell
   script:
     - echo "Installing Qt..."
     - powershell -Command "Invoke-WebRequest -Uri 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_661/qt.qt6.661.win64_msvc2022_64/6.6.1-0-202311151048qtbase-Windows-Windows_10-MSVC2022-Windows-Windows_10-X86_64.7z' -OutFile 'qt.7z'"
@@ -37,7 +37,7 @@ build_windows:
 package_windows:
   stage: package
   tags:
-    - windows
+    - shell
   dependencies:
     - build_windows
   script:

@@ -46,7 +46,7 @@ jobs:
     
     - name: Deploy Qt dependencies
       run: |
-        $qtBinPath = "C:\Qt\6.5.3\msvc2019_64\bin"
+        $qtBinPath = "$env:Qt6_DIR\bin"
         $windeployqt = "$qtBinPath\windeployqt.exe"
         $exePath = "$env:GITHUB_WORKSPACE\build\Release\CppGuiApp.exe"
         & $windeployqt --release $exePath

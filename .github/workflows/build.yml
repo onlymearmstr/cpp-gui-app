@@ -18,10 +18,9 @@ jobs:
       uses: microsoft/setup-msbuild@v1.3
     
     - name: Setup Qt
-      uses: aminya/setup-qt@v1
+      uses: jurplel/install-qt-action@v3
       with:
         version: '6.6.1'
-        host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2022_64'
         cache: true
@@ -33,7 +32,8 @@ jobs:
     
     - name: Configure CMake
       run: |
-        cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+        $env:Qt6_DIR = "C:\Qt\6.6.1\msvc2022_64\lib\cmake\Qt6"
+        cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:Qt6_DIR" -DCMAKE_BUILD_TYPE=Release
     
     - name: Build
       run: |

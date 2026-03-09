@@ -1,0 +1,26 @@
+# 对话文件
+对话*.md
+对话*.txt
+
+# CMake build files
+build/
+
+# IDE files
+.idea/
+.vscode/
+
+# Windows files
+*.exe
+*.dll
+*.lib
+*.pdb
+
+# macOS files
+.DS_Store
+
+# Linux files
+*~
+
+# Qt files
+*.pro.user
+*.qmake.stash
